@@ -1,7 +1,7 @@
 const notesList = document.getElementById("notesList");
 const newNoteInput = document.getElementById("newNoteInput");
 const addRootNoteBtn = document.getElementById("addRootNoteBtn");
-const noteContent = document.getElementById("noteContent");
+const noteBody = document.getElementById("noteBody");
 const editorTitle = document.getElementById("editorTitle");
 
 let noteIdCounter = 0;
@@ -75,6 +75,7 @@ function createNoteNode(titleText) {
   return li;
 }
 
+// Load note
 let selectedNoteId = null;
 
 function loadNote(noteId) {
@@ -82,47 +83,37 @@ function loadNote(noteId) {
   if (!note) return;
   selectedNoteId = noteId;
   editorTitle.textContent = note.title;
-  noteContent.innerHTML = note.content;
-  noteContent.setAttribute("contenteditable", "true");
-  noteContent.removeAttribute("disabled");
+  noteBody.innerHTML = note.content;
+  noteBody.removeAttribute("disabled");
 }
 
-function clearEditor() {
-  selectedNoteId = null;
-  editorTitle.textContent = "No Note Selected";
-  noteContent.innerHTML = "<p>Select a note to start editing...</p>";
-  noteContent.setAttribute("disabled", "true");
-  noteContent.removeAttribute("contenteditable");
-}
-
-// Save content on input
-noteContent.addEventListener("input", () => {
+// Save note content
+noteBody.addEventListener("input", () => {
   if (selectedNoteId) {
     const note = noteMap.get(selectedNoteId);
-    if (note) note.content = noteContent.innerHTML;
+    if (note) note.content = noteBody.innerHTML;
   }
 });
 
-// Handle paste events for rich HTML
-noteContent.addEventListener("paste", function (e) {
+// Paste handler for rich HTML
+noteBody.addEventListener("paste", function (e) {
   e.preventDefault();
   const clipboardData = e.clipboardData || window.clipboardData;
   const htmlData = clipboardData.getData("text/html");
   const plainText = clipboardData.getData("text/plain");
 
   if (htmlData) {
-    insertAtCursor(htmlData, 'html');
-  } else if (plainText) {
-    insertAtCursor(plainText, 'text');
+    insertAtCursor(noteBody, htmlData, 'html');
+  } else {
+    insertAtCursor(noteBody, plainText, 'text');
   }
 });
 
-function insertAtCursor(data, type) {
+function insertAtCursor(el, data, type) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
   range.deleteContents();
-
   let node;
   if (type === 'html') {
     const temp = document.createElement("div");
@@ -137,12 +128,19 @@ function insertAtCursor(data, type) {
     node = document.createTextNode(data);
     range.insertNode(node);
   }
-
   range.collapse(false);
   selection.removeAllRanges();
   selection.addRange(range);
 }
 
+function clearEditor() {
+  selectedNoteId = null;
+  editorTitle.textContent = "No Note Selected";
+  noteBody.innerHTML = "<p>Select a note to start editing...</p>";
+  noteBody.setAttribute("disabled", "true");
+}
+
+// Add new note
 addRootNoteBtn.addEventListener("click", () => {
   const text = newNoteInput.value.trim();
   if (text) {
