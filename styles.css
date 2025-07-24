@@ -1,8 +1,47 @@
+.collapsed-left-bar {
+  position: fixed;
+  top: 35px;
+  left: 0;
+  height: calc(100vh - 35px);
+  width: 20px;
+  background: #1e1e1e;
+  border-right: 1px solid #333;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 20;
+  transition: background 0.15s;
+}
+.collapsed-left-bar.visible {
+  display: flex;
+}
+.collapsed-left-bar button {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, background 0.15s;
+}
+.collapsed-left-bar button:hover {
+  opacity: 1;
+  background: #23272e;
+  color: #fff;
+}
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background-color: #1e1e1e;
   color: #d4d4d4;
+  overflow: hidden;
 }
 
 .topbar {
@@ -23,20 +62,89 @@ body {
   text-decoration: underline;
 }
 
-.container {
+.main {
   display: flex;
   height: calc(100vh - 35px);
+  width: 100%;
 }
 
+/* Sidebar - Left & Right */
+
 .sidebar {
-  width: 300px;
   background-color: #252526;
-  padding: 10px;
-  box-sizing: border-box;
+  color: #fff;
   overflow-y: auto;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid #333;
 }
 
+.sidebar.left {
+  width: 300px;
+  min-width: 0;
+}
+
+.sidebar.left.closed {
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar.right {
+  width: 20px;
+  background-color: #1e1e1e;
+  border-left: 1px solid #333;
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.sidebar.right.expanded {
+  width: 250px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  font-weight: bold;
+  background-color: #2a2d2e;
+  border-bottom: 1px solid #444;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.close-btn:hover {
+  color: white;
+}
+
+.expand-btn {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.right-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-content.hidden {
+  display: none;
+}
+
+/* Editor */
 .editor {
   flex: 1;
   display: flex;
@@ -71,16 +179,11 @@ body {
   opacity: 0.6;
 }
 
-.header {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 12px;
-  color: #ffffff;
-}
-
+/* Add note input */
 .add-root {
   display: flex;
-  margin-top: 10px;
+  padding: 10px;
+  gap: 5px;
 }
 
 #newNoteInput {
@@ -94,7 +197,6 @@ body {
 
 #addRootNoteBtn {
   padding: 0 10px;
-  margin-left: 5px;
   background-color: #0e639c;
   border: none;
   color: white;
@@ -102,10 +204,10 @@ body {
   border-radius: 2px;
 }
 
+/* Tree view */
 .tree {
   list-style: none;
   padding-left: 10px;
-  margin-top: 10px;
 }
 
 .node {

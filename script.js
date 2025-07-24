@@ -1,8 +1,36 @@
+// Collapsed left bar logic
+const collapsedLeftBar = document.getElementById("collapsedLeftBar");
+const openLeftSidebarBtn = document.getElementById("openLeftSidebarBtn");
+
+function updateCollapsedLeftBar() {
+  const leftClosed = leftSidebar.classList.contains("closed");
+  if (leftClosed) {
+    collapsedLeftBar.classList.add("visible");
+  } else {
+    collapsedLeftBar.classList.remove("visible");
+  }
+}
+
+function toggleLeftSidebar() {
+  leftSidebar.classList.toggle("closed");
+  updateCollapsedLeftBar();
+}
+
+if (openLeftSidebarBtn) openLeftSidebarBtn.onclick = function() {
+  leftSidebar.classList.remove("closed");
+  updateCollapsedLeftBar();
+};
+
+// Initial state
+document.addEventListener('DOMContentLoaded', updateCollapsedLeftBar);
 const notesList = document.getElementById("notesList");
 const newNoteInput = document.getElementById("newNoteInput");
 const addRootNoteBtn = document.getElementById("addRootNoteBtn");
 const noteBody = document.getElementById("noteBody");
 const editorTitle = document.getElementById("editorTitle");
+const leftSidebar = document.getElementById("leftSidebar");
+const rightSidebar = document.getElementById("rightSidebar");
+const rightContent = document.querySelector(".right-content");
 
 let noteIdCounter = 0;
 const noteMap = new Map(); // id -> { title, content, element }
@@ -75,7 +103,6 @@ function createNoteNode(titleText) {
   return li;
 }
 
-// Load note
 let selectedNoteId = null;
 
 function loadNote(noteId) {
@@ -87,7 +114,6 @@ function loadNote(noteId) {
   noteBody.removeAttribute("disabled");
 }
 
-// Save note content
 noteBody.addEventListener("input", () => {
   if (selectedNoteId) {
     const note = noteMap.get(selectedNoteId);
@@ -95,7 +121,6 @@ noteBody.addEventListener("input", () => {
   }
 });
 
-// Paste handler for rich HTML
 noteBody.addEventListener("paste", function (e) {
   e.preventDefault();
   const clipboardData = e.clipboardData || window.clipboardData;
@@ -140,7 +165,6 @@ function clearEditor() {
   noteBody.setAttribute("disabled", "true");
 }
 
-// Add new note
 addRootNoteBtn.addEventListener("click", () => {
   const text = newNoteInput.value.trim();
   if (text) {
@@ -149,3 +173,9 @@ addRootNoteBtn.addEventListener("click", () => {
     newNoteInput.value = "";
   }
 });
+
+// Toggle right sidebar (unchanged)
+function toggleRightSidebar() {
+  rightSidebar.classList.toggle("expanded");
+  rightContent.classList.toggle("hidden");
+}

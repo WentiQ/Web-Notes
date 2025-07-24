@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VSCode Notes</title>
+  <title>Advanced Notes</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,22 +15,39 @@
     <div class="menu">Help</div>
   </div>
 
-  <div class="container">
-    <div class="sidebar">
-      <div class="header">
+  <!-- Collapsed left bar -->
+  <div id="collapsedLeftBar" class="collapsed-left-bar hidden">
+    <button id="openLeftSidebarBtn" title="Show Notes">⮞</button>
+  </div>
+  <div class="main">
+    <!-- Left Sidebar -->
+    <div class="sidebar left open" id="leftSidebar">
+      <!-- <button class="expand-btn left" onclick="toggleLeftSidebar()">⮞</button> -->
+      <div class="sidebar-header">
         <span>🗂 Notes</span>
-        <div class="add-root">
-          <input type="text" id="newNoteInput" placeholder="New note..." />
-          <button id="addRootNoteBtn">+</button>
-        </div>
+        <button class="close-btn" onclick="toggleLeftSidebar()">⮜</button>
+      </div>
+      <div class="add-root">
+        <input type="text" id="newNoteInput" placeholder="New note..." />
+        <button id="addRootNoteBtn">+</button>
       </div>
       <ul id="notesList" class="tree"></ul>
     </div>
 
-    <div class="editor">
+    <!-- Editor Area -->
+    <div class="editor" id="editor">
       <h2 id="editorTitle">No Note Selected</h2>
       <div id="noteBody" contenteditable="true" class="note-body" disabled>
         <p>Select a note to start editing...</p>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar right" id="rightSidebar">
+      <button class="expand-btn" onclick="toggleRightSidebar()">⮞</button>
+      <div class="right-content hidden">
+        <h3>Right Panel</h3>
+        <p>You can use this area for tags, search, AI tools, etc.</p>
       </div>
     </div>
   </div>
