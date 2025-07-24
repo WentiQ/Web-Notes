@@ -1,3 +1,106 @@
+
+// Toolbar logic
+document.addEventListener('DOMContentLoaded', function() {
+  const toolbar = document.getElementById('editorToolbar');
+  const noteBody = document.getElementById('noteBody');
+  if (toolbar && noteBody) {
+    toolbar.addEventListener('click', function(e) {
+      const btn = e.target.closest('button[data-cmd]');
+      if (!btn) return;
+      const cmd = btn.getAttribute('data-cmd');
+      let value = btn.getAttribute('data-value') || null;
+      if (cmd === 'createLink') {
+        value = prompt('Enter URL:', 'https://');
+        if (!value) return;
+      }
+      if (cmd === 'hiliteColor') {
+        document.execCommand('hiliteColor', false, value);
+      } else if (cmd === 'formatBlock' && value) {
+        document.execCommand('formatBlock', false, value);
+      } else {
+        document.execCommand(cmd, false, value);
+      }
+      noteBody.focus();
+    });
+  }
+});
+
+// Voice-to-text using Web Speech API
+const startVoiceBtn = document.getElementById("startVoiceBtn");
+
+let recognition;
+let isRecording = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      transcript += event.results[i][0].transcript;
+    }
+
+    if (selectedNoteId && noteBody) {
+      // Insert at cursor or append
+      if (document.activeElement === noteBody) {
+        document.execCommand('insertText', false, transcript);
+      } else {
+        noteBody.innerHTML += transcript;
+      }
+      const note = noteMap.get(selectedNoteId);
+      if (note) note.content = noteBody.innerHTML;
+    }
+  };
+
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    stopVoiceRecognition();
+  };
+} else if (startVoiceBtn) {
+  startVoiceBtn.onclick = () => {
+    alert("Your browser does not support Speech Recognition. Try Chrome or Edge.");
+  };
+}
+
+
+function startVoiceRecognition() {
+  if (recognition && !isRecording) {
+    recognition.start();
+    isRecording = true;
+    startVoiceBtn.classList.add("active");
+    startVoiceBtn.title = "Stop Voice Note";
+    startVoiceBtn.innerText = "Listening...";
+  }
+}
+
+
+function stopVoiceRecognition() {
+  if (recognition && isRecording) {
+    recognition.stop();
+    isRecording = false;
+    startVoiceBtn.classList.remove("active");
+    startVoiceBtn.title = "Start Voice Note";
+    startVoiceBtn.innerText = "🎤";
+  }
+}
+
+if (startVoiceBtn && (recognition || ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window))) {
+  startVoiceBtn.addEventListener("click", () => {
+    if (!selectedNoteId) {
+      alert("Please select a note before using voice input.");
+      return;
+    }
+    if (isRecording) {
+      stopVoiceRecognition();
+    } else {
+      startVoiceRecognition();
+    }
+  });
+}
 // Collapsed left bar logic
 const collapsedLeftBar = document.getElementById("collapsedLeftBar");
 const openLeftSidebarBtn = document.getElementById("openLeftSidebarBtn");

@@ -36,7 +36,24 @@
 
     <!-- Editor Area -->
     <div class="editor" id="editor">
-      <h2 id="editorTitle">No Note Selected</h2>
+      <div class="editor-header">
+        <button id="toggleSidebarBtn" style="display:none">📁</button>
+        <h2 id="editorTitle">No Note Selected</h2>
+        <div class="toolbar" id="editorToolbar">
+          <button type="button" class="toolbar-btn" title="Bold" data-cmd="bold"><b>B</b></button>
+          <button type="button" class="toolbar-btn" title="Italic" data-cmd="italic"><i>I</i></button>
+          <button type="button" class="toolbar-btn" title="Underline" data-cmd="underline"><u>U</u></button>
+          <button type="button" class="toolbar-btn" title="Highlight" data-cmd="hiliteColor" data-value="#ffe066"><span style="background:#ffe066;color:#222">H</span></button>
+          <button type="button" class="toolbar-btn" title="Strikethrough" data-cmd="strikeThrough"><s>S</s></button>
+          <button type="button" class="toolbar-btn" title="Heading 1" data-cmd="formatBlock" data-value="H1">H1</button>
+          <button type="button" class="toolbar-btn" title="Heading 2" data-cmd="formatBlock" data-value="H2">H2</button>
+          <button type="button" class="toolbar-btn" title="Heading 3" data-cmd="formatBlock" data-value="H3">H3</button>
+          <button type="button" class="toolbar-btn" title="Numbered List" data-cmd="insertOrderedList">1.</button>
+          <button type="button" class="toolbar-btn" title="Bullet List" data-cmd="insertUnorderedList">•</button>
+          <button type="button" class="toolbar-btn" title="Insert Link" data-cmd="createLink">🔗</button>
+          <button id="startVoiceBtn" title="Start Voice Note">🎤</button>
+        </div>
+      </div>
       <div id="noteBody" contenteditable="true" class="note-body" disabled>
         <p>Select a note to start editing...</p>
       </div>
