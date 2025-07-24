@@ -1,3 +1,57 @@
+// LocalStorage keys
+const NOTES_KEY = 'web_notes_data_v2';
+
+// Serialize notes tree to array
+function serializeNotesTree(ul) {
+  const arr = [];
+  if (!ul) return arr;
+  for (const li of ul.children) {
+    const id = li.dataset.id;
+    const note = noteMap.get(id);
+    if (!note) continue;
+    const childrenUl = li.querySelector(':scope > ul.children');
+    arr.push({
+      id,
+      title: note.title,
+      content: note.content,
+      children: serializeNotesTree(childrenUl)
+    });
+  }
+  return arr;
+}
+
+// Restore notes tree from array
+function restoreNotesTree(arr, parentUl) {
+  for (const n of arr) {
+    const li = createNoteNode(n.title, n.id, n.content);
+    if (n.children && n.children.length) {
+      restoreNotesTree(n.children, li.querySelector(':scope > ul.children'));
+    }
+    parentUl.appendChild(li);
+  }
+}
+
+function saveNotesToStorage() {
+  const arr = serializeNotesTree(notesList);
+  localStorage.setItem(NOTES_KEY, JSON.stringify({notes: arr, noteIdCounter}));
+}
+
+function loadNotesFromStorage() {
+  const data = localStorage.getItem(NOTES_KEY);
+  if (!data) return;
+  try {
+    const obj = JSON.parse(data);
+    noteIdCounter = obj.noteIdCounter || 0;
+    notesList.innerHTML = '';
+    noteMap.clear();
+    restoreNotesTree(obj.notes, notesList);
+  } catch (e) {
+    console.error('Failed to load notes from localStorage', e);
+  }
+}
+
+// Call on startup
+document.addEventListener('DOMContentLoaded', loadNotesFromStorage);
 
 // Toolbar logic
 document.addEventListener('DOMContentLoaded', function() {
@@ -52,7 +106,10 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         noteBody.innerHTML += transcript;
       }
       const note = noteMap.get(selectedNoteId);
-      if (note) note.content = noteBody.innerHTML;
+      if (note) {
+        note.content = noteBody.innerHTML;
+        saveNotesToStorage();
+      }
     }
   };
 
@@ -138,9 +195,14 @@ const rightContent = document.querySelector(".right-content");
 let noteIdCounter = 0;
 const noteMap = new Map(); // id -> { title, content, element }
 
-function createNoteNode(titleText) {
-  const noteId = `note-${noteIdCounter++}`;
-  const noteData = { title: titleText, content: "", id: noteId };
+function createNoteNode(titleText, id = null, content = "") {
+  const noteId = id || `note-${noteIdCounter++}`;
+  // Ensure noteIdCounter is always greater than any restored id
+  if (noteId.startsWith('note-')) {
+    const num = parseInt(noteId.slice(5));
+    if (!isNaN(num) && num >= noteIdCounter) noteIdCounter = num + 1;
+  }
+  const noteData = { title: titleText, content: content, id: noteId };
 
   const li = document.createElement("li");
   li.className = "node";
@@ -166,6 +228,7 @@ function createNoteNode(titleText) {
     if (subText) {
       const subNode = createNoteNode(subText);
       children.appendChild(subNode);
+      saveNotesToStorage();
     }
   };
 
@@ -187,6 +250,7 @@ function createNoteNode(titleText) {
       if (selectedNoteId === noteId) clearEditor();
       li.remove();
       noteMap.delete(noteId);
+      saveNotesToStorage();
     }
   };
 
@@ -213,14 +277,17 @@ function loadNote(noteId) {
   if (!note) return;
   selectedNoteId = noteId;
   editorTitle.textContent = note.title;
-  noteBody.innerHTML = note.content;
+  noteBody.innerHTML = note.content || "";
   noteBody.removeAttribute("disabled");
 }
 
 noteBody.addEventListener("input", () => {
   if (selectedNoteId) {
     const note = noteMap.get(selectedNoteId);
-    if (note) note.content = noteBody.innerHTML;
+    if (note) {
+      note.content = noteBody.innerHTML;
+      saveNotesToStorage();
+    }
   }
 });
 
@@ -274,6 +341,7 @@ addRootNoteBtn.addEventListener("click", () => {
     const node = createNoteNode(text);
     notesList.appendChild(node);
     newNoteInput.value = "";
+    saveNotesToStorage();
   }
 });
 
