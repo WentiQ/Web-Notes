@@ -1,0 +1,100 @@
+/* styles.css - VS Code theme */
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.sidebar {
+  width: 300px;
+  height: 100vh;
+  background-color: #252526;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.header {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.add-root {
+  display: flex;
+  margin-top: 10px;
+}
+
+#newNoteInput {
+  flex: 1;
+  padding: 6px;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #3c3c3c;
+  border-radius: 2px;
+}
+
+#addRootNoteBtn {
+  padding: 0 10px;
+  margin-left: 5px;
+  background-color: #0e639c;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.tree {
+  list-style: none;
+  padding-left: 10px;
+  margin-top: 10px;
+}
+
+.node {
+  padding: 5px;
+  margin-left: 5px;
+  border-left: 1px solid #444;
+  position: relative;
+}
+
+.node .label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1e1e1e;
+  padding: 3px 5px;
+}
+
+.node .label:hover {
+  background-color: #2a2d2e;
+}
+
+.node .actions {
+  display: flex;
+  gap: 5px;
+}
+
+.node .actions button {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.node .actions button:hover {
+  color: white;
+}
+
+.children {
+  margin-left: 10px;
+  border-left: 1px solid #333;
+}
+
+.hidden {
+  display: none;
+}
