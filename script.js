@@ -1,76 +1,153 @@
-// script.js
+const notesList = document.getElementById("notesList");
+const newNoteInput = document.getElementById("newNoteInput");
+const addRootNoteBtn = document.getElementById("addRootNoteBtn");
+const noteContent = document.getElementById("noteContent");
+const editorTitle = document.getElementById("editorTitle");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const notesList = document.getElementById("notesList");
-  const newNoteInput = document.getElementById("newNoteInput");
-  const addRootNoteBtn = document.getElementById("addRootNoteBtn");
+let noteIdCounter = 0;
+const noteMap = new Map(); // id -> { title, content, element }
 
-  // Utility to create a new note node
-  function createNoteNode(text) {
-    const li = document.createElement("li");
-    li.className = "node";
+function createNoteNode(titleText) {
+  const noteId = `note-${noteIdCounter++}`;
+  const noteData = { title: titleText, content: "", id: noteId };
 
-    // Label Section
-    const label = document.createElement("div");
-    label.className = "label";
-    const title = document.createElement("span");
-    title.textContent = text;
+  const li = document.createElement("li");
+  li.className = "node";
+  li.dataset.id = noteId;
 
-    // Buttons
-    const actions = document.createElement("div");
-    actions.className = "actions";
+  const label = document.createElement("div");
+  label.className = "label";
 
-    const addBtn = document.createElement("button");
-    addBtn.innerHTML = "➕";
-    addBtn.title = "Add Subnote";
-    addBtn.onclick = () => {
-      const subText = prompt("Enter subnote:");
-      if (subText) {
-        const subNode = createNoteNode(subText);
-        children.appendChild(subNode);
-      }
-    };
+  const titleSpan = document.createElement("span");
+  titleSpan.textContent = titleText;
+  titleSpan.style.flex = "1";
+  titleSpan.onclick = () => loadNote(noteId);
 
-    const toggleBtn = document.createElement("button");
-    toggleBtn.innerHTML = "▶️";
-    toggleBtn.title = "Toggle";
-    toggleBtn.onclick = () => {
-      children.classList.toggle("hidden");
-      toggleBtn.innerHTML = children.classList.contains("hidden") ? "▶️" : "🔽";
-    };
+  const actions = document.createElement("div");
+  actions.className = "actions";
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerHTML = "🗑️";
-    deleteBtn.title = "Delete";
-    deleteBtn.onclick = () => {
-      if (confirm("Delete this note and its subnotes?")) {
-        li.remove();
-      }
-    };
+  const addBtn = document.createElement("button");
+  addBtn.innerHTML = "➕";
+  addBtn.title = "Add Subnote";
+  addBtn.onclick = (e) => {
+    e.stopPropagation();
+    const subText = prompt("Enter subnote title:");
+    if (subText) {
+      const subNode = createNoteNode(subText);
+      children.appendChild(subNode);
+    }
+  };
 
-    actions.appendChild(addBtn);
-    actions.appendChild(toggleBtn);
-    actions.appendChild(deleteBtn);
+  const toggleBtn = document.createElement("button");
+  toggleBtn.innerHTML = "▶️";
+  toggleBtn.title = "Toggle Children";
+  toggleBtn.onclick = (e) => {
+    e.stopPropagation();
+    children.classList.toggle("hidden");
+    toggleBtn.innerHTML = children.classList.contains("hidden") ? "▶️" : "🔽";
+  };
 
-    label.appendChild(title);
-    label.appendChild(actions);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.innerHTML = "🗑️";
+  deleteBtn.title = "Delete";
+  deleteBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (confirm("Delete this note and all subnotes?")) {
+      if (selectedNoteId === noteId) clearEditor();
+      li.remove();
+      noteMap.delete(noteId);
+    }
+  };
 
-    const children = document.createElement("ul");
-    children.className = "children tree";
+  actions.append(addBtn, toggleBtn, deleteBtn);
+  label.appendChild(titleSpan);
+  label.appendChild(actions);
 
-    li.appendChild(label);
-    li.appendChild(children);
+  const children = document.createElement("ul");
+  children.className = "children tree";
 
-    return li;
+  li.appendChild(label);
+  li.appendChild(children);
+
+  noteData.element = li;
+  noteMap.set(noteId, noteData);
+
+  return li;
+}
+
+let selectedNoteId = null;
+
+function loadNote(noteId) {
+  const note = noteMap.get(noteId);
+  if (!note) return;
+  selectedNoteId = noteId;
+  editorTitle.textContent = note.title;
+  noteContent.innerHTML = note.content;
+  noteContent.setAttribute("contenteditable", "true");
+  noteContent.removeAttribute("disabled");
+}
+
+function clearEditor() {
+  selectedNoteId = null;
+  editorTitle.textContent = "No Note Selected";
+  noteContent.innerHTML = "<p>Select a note to start editing...</p>";
+  noteContent.setAttribute("disabled", "true");
+  noteContent.removeAttribute("contenteditable");
+}
+
+// Save content on input
+noteContent.addEventListener("input", () => {
+  if (selectedNoteId) {
+    const note = noteMap.get(selectedNoteId);
+    if (note) note.content = noteContent.innerHTML;
+  }
+});
+
+// Handle paste events for rich HTML
+noteContent.addEventListener("paste", function (e) {
+  e.preventDefault();
+  const clipboardData = e.clipboardData || window.clipboardData;
+  const htmlData = clipboardData.getData("text/html");
+  const plainText = clipboardData.getData("text/plain");
+
+  if (htmlData) {
+    insertAtCursor(htmlData, 'html');
+  } else if (plainText) {
+    insertAtCursor(plainText, 'text');
+  }
+});
+
+function insertAtCursor(data, type) {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+
+  let node;
+  if (type === 'html') {
+    const temp = document.createElement("div");
+    temp.innerHTML = data;
+    const frag = document.createDocumentFragment();
+    let child;
+    while ((child = temp.firstChild)) {
+      frag.appendChild(child);
+    }
+    range.insertNode(frag);
+  } else {
+    node = document.createTextNode(data);
+    range.insertNode(node);
   }
 
-  // Add root-level note
-  addRootNoteBtn.addEventListener("click", () => {
-    const text = newNoteInput.value.trim();
-    if (text) {
-      const node = createNoteNode(text);
-      notesList.appendChild(node);
-      newNoteInput.value = "";
-    }
-  });
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+addRootNoteBtn.addEventListener("click", () => {
+  const text = newNoteInput.value.trim();
+  if (text) {
+    const node = createNoteNode(text);
+    notesList.appendChild(node);
+    newNoteInput.value = "";
+  }
 });

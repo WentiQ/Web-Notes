@@ -8,16 +8,24 @@
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="header">
-      <span>🗂 Notes</span>
-      <div class="add-root">
-        <input type="text" id="newNoteInput" placeholder="New note..." />
-        <button id="addRootNoteBtn">+</button>
+  <div class="container">
+    <div class="sidebar">
+      <div class="header">
+        <span>🗂 Notes</span>
+        <div class="add-root">
+          <input type="text" id="newNoteInput" placeholder="New note..." />
+          <button id="addRootNoteBtn">+</button>
+        </div>
       </div>
+      <ul id="notesList" class="tree"></ul>
     </div>
 
-    <ul id="notesList" class="tree"></ul>
+    <div class="editor">
+      <h2 id="editorTitle">No Note Selected</h2>
+      <div id="noteContent" class="note-body" contenteditable="true" disabled>
+        <p>Select a note to start editing...</p>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
